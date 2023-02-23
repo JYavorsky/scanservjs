@@ -109,9 +109,6 @@ RUN groupadd -g $GID -o $UNAME \
   && chown -R $UID:$GID /run.sh "$APP_DIR" /etc/sane.d/net.conf /etc/sane.d/airscan.conf
 USER $UNAME
 
-# default build
-FROM scanservjs-core
-
 # hplip image
 #
 # This image adds the HP scanner libs to the image. This target is not built by
@@ -119,7 +116,9 @@ FROM scanservjs-core
 # ==============================================================================
 FROM scanservjs-core AS scanservjs-hplip
 RUN apt-get update \
-  && apt-get install -yq libsane-hpaio \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && echo hpaio >> /etc/sane.d/dll.conf
+  && apt-get install -yq \
+    hplip \
+  && rm -rf /var/lib/apt/lists/*;
+
+# default build
+FROM scanservjs-hplip
