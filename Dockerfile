@@ -119,7 +119,7 @@ FROM scanservjs-core
 # ==============================================================================
 FROM scanservjs-core AS scanservjs-hplip
 RUN apt-get update \
-  && apt-get install -yq \
-    hplip \
+  && apt-get install -yq libsane-hpaio \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*;
+  && rm -rf /var/lib/apt/lists/* \
+  && echo hpaio >> /etc/sane.d/dll.conf
