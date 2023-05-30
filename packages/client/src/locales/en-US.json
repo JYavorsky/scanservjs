@@ -30,8 +30,8 @@
     "orange": "Orange",
     "deep-orange": "Deep orange",
     "brown": "Brown",
-    "blue-grey": "Blue grey",
-    "grey": "Grey"
+    "blue-grey": "Blue gray",
+    "grey": "Gray"
   },
 
   "batch-dialog": {
@@ -83,9 +83,9 @@
   },
 
   "mode": {
-    "color": "Colour",
+    "color": "Color",
     "halftone": "Halftone",
-    "gray": "Grey",
+    "gray": "Gray",
     "lineart": "Lineart",
 
     "24bitcolor":"@:mode.color",
@@ -168,7 +168,7 @@
 
   "settings": {
     "title": "@:navigation.settings",
-    "behaviour-ui": "Behaviour and UI",
+    "behaviour-ui": "Behavior and UI",
     "locale": "Locale",
     "locale:description": "Choose your locale",
     "theme": "Theme",
@@ -176,33 +176,13 @@
     "theme:system": "System",
     "theme:light": "Light",
     "theme:dark": "Dark",
-    "color": "Colour",
-    "color:description": "Colour. This will change the colour of the top app bar.",
+    "color": "Color",
+    "color:description": "Color. This will change the color of the top app bar.",
     "show-files-after-scan:description": "Show files after scan completes",
     "devices": "Devices and storage",
     "reset:description": "Clears stored scanner devices and forces a reload",
     "reset": "Reset",
     "clear-storage:description": "Clears local storage of any cached parameters",
     "clear-storage": "Clear"
-  },
-
-  "locales": {
-    "ar": "العربية",
-    "cs": "Čeština",
-    "de": "Deutsch",
-    "en": "English (UK)",
-    "en-US": "English (US)",
-    "es": "Español",
-    "fr": "Français",
-    "it": "Italiano",
-    "nl": "Nederlands",
-    "pl": "Polski",
-    "pt": "Portuguese (Portugal)",
-    "pt-BR": "Portuguese (Brazilian)",
-    "ru": "Russian",
-    "sk": "Slovenčina",
-    "tr": "Türkçe",
-    "zh": "简体中文",
-    "test": "Test"
   }
 }
