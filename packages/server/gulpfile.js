@@ -20,6 +20,13 @@ const linter = () => {
 //  * https://github.com/gulpjs/gulp/tree/master/docs/recipes
 
 const app = {
+  client: {
+    build: () => {
+      return src(['../client/dist/**/*'])
+        .pipe(dest(`${DIST}/client/`));
+    }
+  },
+
   server: {
     lint: () => {
       return src(['./src/**/*.js', './config/config.default.js', './test/**/*.js', 'gulpfile.js'])
@@ -35,7 +42,6 @@ const app = {
         './installer.sh',
         './scanservjs.service',
         './package.json',
-        './package-lock.json',
         './*config/**/config.default.js',
         './*data/**/default.jpg'])
         .pipe(shellFilter)
@@ -67,6 +73,6 @@ const app = {
 };
 
 exports.lint = app.server.lint;
-exports.build = app.server.build;
+exports.build = series(app.client.build, app.server.build);
 exports.package = app.package;
 exports.default = series(exports.build);

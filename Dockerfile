@@ -2,7 +2,7 @@
 #
 # The builder image simply builds the core javascript app and nothing else
 # ==============================================================================
-FROM node:16-alpine AS scanservjs-build
+FROM node:18-alpine AS scanservjs-build
 ENV APP_DIR=/app
 WORKDIR "$APP_DIR"
 
@@ -10,7 +10,7 @@ COPY package*.json "$APP_DIR/"
 COPY packages/server/package*.json "$APP_DIR/packages/server/"
 COPY packages/client/package*.json "$APP_DIR/packages/client/"
 
-RUN npm run install
+RUN npm install .
 
 COPY packages/client/ "$APP_DIR/packages/client/"
 COPY packages/server/ "$APP_DIR/packages/server/"
@@ -19,9 +19,9 @@ RUN npm run build
 
 # Sane image
 #
-# This is the minimum bullseye/node/sane image required which is used elsewhere.
+# This is the minimum bookworm/node/sane image required which is used elsewhere.
 # ==============================================================================
-FROM node:16-bullseye-slim AS scanservjs-base
+FROM node:18-bookworm-slim AS scanservjs-base
 RUN apt-get update \
   && apt-get install -yq \
     imagemagick \
@@ -125,3 +125,20 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && echo hpaio >> /etc/sane.d/dll.conf
+
+# brscan4 image
+#
+# This image includes the brscan4 driver which is needed for some Brother
+# printers/scanners. This target is not built by default -
+# you will need to specifically target it.
+# ==============================================================================
+FROM scanservjs-core AS scanservjs-brscan4
+RUN apt-get update \
+  && apt-get install -yq curl \
+  && curl -fSsL "https://download.brother.com/welcome/dlf105200/brscan4-0.4.11-1.amd64.deb" -o /tmp/brscan4.deb \
+  && apt-get remove curl -yq \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && dpkg -i /tmp/brscan4.deb \
+  && rm /tmp/brscan4.deb \
+  && echo brscan4 >> /etc/sane.d/dll.conf

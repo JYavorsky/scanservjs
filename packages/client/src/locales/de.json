@@ -1,4 +1,11 @@
 {
+  "$vuetify": {
+    "dataFooter": {
+      "itemsPerPageAll": "@:files.items-per-page-all"
+    },
+    "noDataText": "@:global.no-data-text"
+  },
+
   "global": {
     "application-name": "scanservjs"
   },
@@ -74,6 +81,8 @@
 
   "filter": {
     "auto-level": "Automatische Farbjustierung",
+    "auto-contrast": "Automatische Kontrastjustierung",
+    "more-contrast": "Starker Kontrast",
     "threshold": "Schwellwert",
     "blur": "Weichzeichner"
   },

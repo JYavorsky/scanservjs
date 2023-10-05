@@ -1,81 +1,80 @@
 <template>
   <v-data-table
+      v-model="selectedFiles"
       :headers="headers"
       :items="files"
-      v-model="selectedFiles"
-      item-key="name"
-      :footer-props="{
-        'items-per-page-text': $t('files.items-per-page'),
-        'items-per-page-all-text': $t('files.items-per-page-all')
-      }"
+      :items-per-page-text="$t('files.items-per-page')"
+      return-object
       show-select>
-    <template v-slot:top>
+    <template #top>
       <v-toolbar flat>
-      <v-checkbox class="mt-6"
-        v-model="thumbnails.show" :label="$t('files.thumbnail-show')" />
-      <v-slider v-if="thumbnails.show" class="mt-6 ml-8" min="32" max="128" step="16"
-        v-model="thumbnails.size" :inverse-label="true"
-        :label="`${$t('files.thumbnail-size')} (${thumbnails.size})`"/>
-      <v-spacer/>
-      <v-btn
-        @click="multipleDelete"
-        :disabled="selectedFiles.length === 0"
-        color="primary">{{ $t('files.button:delete-selected') }}</v-btn>
-      <v-menu bottom :offset-y="true" v-if="actions.length > 0">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            :disabled="selectedFiles.length === 0"
-            color="primary"
-            v-bind="attrs" v-on="on">{{ $t('files.button:action-selected') }}</v-btn>
-        </template>
-        <v-list>
-          <v-list-item v-for="(action, index) in actions" :key="index" :value="action" @click="multipleAction(action)">
-            <v-list-item-title >{{ action }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-dialog v-model="dialogEdit" max-width="500px">
-        <v-card>
-          <v-card-title class="text-h5">{{ $t('files.dialog:rename') }}</v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-text-field v-model="editedItem.newName" :label="$t('files.filename')">
-              </v-text-field>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn small @click="closeRename">
-              {{ $t('files.dialog:rename-cancel') }}
+        <v-checkbox v-model="thumbnails.show"
+          class="mt-6" :label="$t('files.thumbnail-show')" />
+        <v-slider v-if="thumbnails.show" v-model="thumbnails.size" class="mt-6 ml-8" min="32" max="128"
+          step="16" :inverse-label="true"
+          :label="`${$t('files.thumbnail-size')} (${thumbnails.size})`" />
+        <v-spacer />
+        <v-btn v-if="!smAndDown" :disabled="selectedFiles.length === 0" color="warning" @click="multipleDelete">
+          {{ $t('files.button:delete-selected') }}
+        </v-btn>
+        <v-menu v-if="actions.length > 0" bottom :offset-y="true">
+          <template #activator="{ props }">
+            <v-btn
+                :disabled="selectedFiles.length === 0"
+                color="primary"
+                v-bind="props">
+              <v-icon v-if="smAndDown">mdi-dots-vertical</v-icon>
+              <span v-if="!smAndDown">{{ $t('files.button:action-selected') }}</span>
             </v-btn>
-            <v-btn small @click="renameFileConfirm" color="primary">
-              {{ $t('files.dialog:rename-save') }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+          </template>
+          <v-list>
+            <v-list-item v-if="smAndDown" :title="$t('files.button:delete-selected')" @click="multipleDelete" />
+            <v-list-item v-for="(action, index) in actions" :key="index" :title="action" @click="multipleAction(action)" />
+          </v-list>
+        </v-menu>
+        <v-dialog v-model="dialogEdit" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5">{{ $t('files.dialog:rename') }}</v-card-title>
+            <v-card-text>
+              <v-container>
+                <v-text-field v-model="editedItem.newName" :label="$t('files.filename')" />
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn small @click="closeRename">
+                {{ $t('files.dialog:rename-cancel') }}
+              </v-btn>
+              <v-btn small color="primary" @click="renameFileConfirm">
+                {{ $t('files.dialog:rename-save') }}
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-toolbar>
     </template>
-    <template v-slot:[`item.thumb`]="{ item }" v-if="thumbnails.show">
-      <v-img :src="`./files/${item.name}/thumbnail`"
+
+    <template v-if="thumbnails.show" #[`item.thumb`]="{ item }">
+      <v-img :src="`api/v1/files/${item.columns.name}/thumbnail`"
+        width="128"
         :max-height="thumbnails.size" :max-width="thumbnails.size"
         :contain="true" />
     </template>
-    <template v-slot:[`item.lastModified`]="{ item }">
-      {{ $d(new Date(item.lastModified), 'long', $i18n.locale) }}
+    <template #[`item.lastModified`]="{ item }">
+      {{ $d(new Date(item.columns.lastModified), 'long') }}
     </template>
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon @click="open(item)" class="mr-2">
+    <template #[`item.actions`]="{ item }">
+      <v-icon class="mr-2" @click="open(item.columns)">
         mdi-download
       </v-icon>
-      <v-icon @click="fileRename(item)" class="mr-2">
+      <v-icon class="mr-2" @click="fileRename(item.columns)">
         mdi-pencil
       </v-icon>
-      <v-icon @click="fileRemove(item)" class="mr-2">
+      <v-icon class="mr-2" @click="fileRemove(item.columns)">
         mdi-delete
       </v-icon>
     </template>
-    <template v-slot:[`footer.page-text`]="items">
+    <template #[`footer.page-text`]="items">
       {{ items.pageStart }} - {{ items.pageStop }} / {{ items.itemsLength }}
     </template>
   </v-data-table>
@@ -84,51 +83,30 @@
 <script>
 import Common from '../classes/common';
 import Storage from '../classes/storage';
-
+import { VDataTable } from 'vuetify/labs/VDataTable';
+import { useDisplay } from 'vuetify';
 const storage = Storage.instance();
 
 export default {
   name: 'Files',
 
-  mounted() {
-    this.fileList();
-    this.actionList();
+  components: {
+    VDataTable
   },
 
+  emits: ['mask', 'notify'],
+
+  setup() {
+    const { smAndDown } = useDisplay();
+    return {
+      smAndDown
+    };
+  },
+  
   data() {
     return {
       dialogDelete: false,
       dialogEdit: false,
-      headers: [
-        {
-          align: 'start',
-          sortable: false,
-          value: 'thumb',
-        },
-        {
-          text: this.$t('files.filename'),
-          align: 'start',
-          sortable: true,
-          value: 'name',
-        },
-        {
-          text: this.$t('files.date'),
-          align: 'start',
-          sortable: true,
-          value: 'lastModified',
-        },
-        {
-          text: this.$t('files.size'),
-          align: 'start',
-          sortable: true,
-          value: 'sizeString',
-        },
-        {
-          text: this.$t('files.actions'),
-          value: 'actions',
-          sortable: false
-        },
-      ],
       files: [],
       editedItem: {
         name: '',
@@ -147,6 +125,49 @@ export default {
     };
   },
 
+  computed: {
+    headers() {
+      const headers = [
+        {
+          align: 'start',
+          sortable: false,
+          value: 'thumb',
+          key: 'thumb',
+        },
+        {
+          title: this.$t('files.filename'),
+          align: 'start',
+          sortable: true,
+          key: 'name',
+        },
+        {
+          title: this.$t('files.date'),
+          align: 'start',
+          sortable: true,
+          key: 'lastModified',
+        },
+        {
+          title: this.$t('files.size'),
+          align: 'start',
+          sortable: true,
+          key: 'sizeString',
+        },
+        {
+          title: this.$t('files.actions'),
+          value: 'actions',
+          sortable: false,
+          key: 'actions',
+        },
+      ];
+
+      if (this.smAndDown) {
+        headers.splice(2, 2);
+      }
+      console.log(headers);
+      return headers;
+    }
+  },
+
   watch: {
     dialogEdit(val) {
       val || this.closeRename();
@@ -161,10 +182,15 @@ export default {
     }
   },
 
+  mounted() {
+    this.fileList();
+    this.actionList();
+  },
+
   methods: {
     actionList() {
       this.$emit('mask', 1);
-      Common.fetch('context').then(context => {
+      Common.fetch('api/v1/context').then(context => {
         this.actions = context.actions;
         this.$emit('mask', -1);
       }).catch(error => {
@@ -175,7 +201,7 @@ export default {
 
     fileList() {
       this.$emit('mask', 1);
-      Common.fetch('files').then(files => {
+      Common.fetch('api/v1/files').then(files => {
         this.files = files;
         this.$emit('mask', -1);
       }).catch(error => {
@@ -186,7 +212,7 @@ export default {
 
     fileRemove(file) {
       this.$emit('mask', 1);
-      Common.fetch(`files/${file.name}`, {
+      Common.fetch(`api/v1/files/${file.name}`, {
         method: 'DELETE'
       }).then(data => {
         this.$emit('notify', {type: 'i', message: `${this.$t('files.message:deleted', [data.name])}`});
@@ -207,7 +233,7 @@ export default {
 
     renameFileConfirm() {
       this.$emit('mask', 1);
-      Common.fetch(`files/${this.editedItem.name}`, {
+      Common.fetch(`api/v1/files/${this.editedItem.name}`, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -240,7 +266,7 @@ export default {
         refresh = true;
         const name = this.selectedFiles[0].name;
         try {
-          await Common.fetch(`files/${name}`, {method: 'DELETE'});
+          await Common.fetch(`api/v1/files/${name}`, {method: 'DELETE'});
           this.$emit('notify', {type: 'i', message: `${this.$t('files.message:deleted', [name])}`});
         } catch (error) {
           this.$emit('notify', {type: 'e', message: error});
@@ -259,7 +285,7 @@ export default {
         refresh = true;
         const filename = this.selectedFiles[0].name;
         try {
-          await Common.fetch(`files/${filename}/actions/${actionName}`, {method: 'POST'});
+          await Common.fetch(`api/v1/files/${filename}/actions/${actionName}`, {method: 'POST'});
           this.$emit('notify', {type: 'i', message: `${this.$t('files.message:action', [actionName, filename])}`});
         } catch (error) {
           this.$emit('notify', {type: 'e', message: error});
@@ -273,7 +299,7 @@ export default {
     },
 
     open(file) {
-      window.location.href = `files/${file.name}`;
+      window.location.href = `api/v1/files/${file.name}`;
     },
 
     selectToggle(value) {

@@ -1,4 +1,11 @@
 {
+  "$vuetify": {
+    "dataFooter": {
+      "itemsPerPageAll": "@:files.items-per-page-all"
+    },
+    "noDataText": "@:global.no-data-text"
+  },
+
   "global": {
     "application-name": "scanservjs",
     "no-data-text": "Žádná data nejsou k dispozici"
@@ -76,6 +83,8 @@
     
   "filter": {
     "auto-level": "Automatické zarovnání",
+    "auto-contrast": "Automatický kontrast",
+    "more-contrast": "Vyšší kontrast",
     "threshold": "Práh",
     "blur": "Rozostření"
   },

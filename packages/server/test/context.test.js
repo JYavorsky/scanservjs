@@ -43,9 +43,11 @@ describe('Context', () => {
       },
       filters: {
         options: [
+          'filter.auto-contrast',
           'filter.auto-level',
           'filter.threshold',
-          'filter.blur'
+          'filter.blur',
+          'filter.more-contrast'
         ],
         default: []
       },
@@ -204,9 +206,11 @@ describe('Context', () => {
       },
       filters: {
         options: [
+          'filter.auto-contrast',
           'filter.auto-level',
           'filter.threshold',
-          'filter.blur'
+          'filter.blur',
+          'filter.more-contrast'
         ],
         default: []
       },
